@@ -55,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Configurações de dificuldade
   const difficultySettings = {
-    easy: { pairs: 3, cols: 3 },
-    medium: { pairs: 6, cols: 4 },
-    hard: { pairs: 9, cols: 6 },
+    easy: { pairs: 3 },
+    medium: { pairs: 6 },
+    hard: { pairs: 8 },
   }
 
   // Inicializar o jogo
@@ -81,9 +81,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     currentDifficulty = difficulty
 
-    // Ajustar o layout do grid com base na dificuldade
-    const columns = difficultySettings[difficulty].cols
-    gameBoard.style.gridTemplateColumns = `repeat(${columns}, 1fr)`
+    // Ajustar a classe do tabuleiro com base na dificuldade
+    gameBoard.className = "game-board " + difficulty
 
     // Reiniciar o jogo com a nova dificuldade
     restartGame()
@@ -99,6 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
     attemptsElement.textContent = "0"
     congratulationsElement.classList.add("hidden")
     gameBoard.innerHTML = ""
+
+    // Ajustar a classe do tabuleiro com base na dificuldade atual
+    gameBoard.className = "game-board " + currentDifficulty
 
     // Obter número de pares com base na dificuldade
     const numPairs = difficultySettings[currentDifficulty].pairs
@@ -150,7 +152,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       cardElement.innerHTML = `
                 <div class="card-inner">
-                    <div class="card-front">?</div>
+                    <div class="card-front">
+                        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp" alt="?" class="card-question">
+                    </div>
                     <div class="card-back">
                         <img src="${card.imageUrl}" alt="Card Image">
                     </div>
@@ -266,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Verificar se o entry é um objeto (novo formato) ou um número (formato antigo)
       if (typeof entry === "object") {
-        // Formatar a dificuldade para exibição em português
+        // Formatar a dificuldade para exibição
         const difficultyText =
           {
             easy: "Fácil",
@@ -274,20 +278,9 @@ document.addEventListener("DOMContentLoaded", () => {
             hard: "Difícil",
           }[entry.difficulty] || entry.difficulty
 
-        // Formatar a data se disponível
-        let dateText = ""
-        if (entry.date) {
-          try {
-            const date = new Date(entry.date)
-            dateText = ` - ${date.toLocaleDateString()}`
-          } catch (e) {
-            // Ignorar erros de formatação de data
-          }
-        }
-
         historyItem.innerHTML = `
                     <span>Partida ${attemptHistory.length - (recentHistory.length - 1 - index)}:</span>
-                    <span>${entry.attempts} tentativas (${difficultyText}${dateText})</span>
+                    <span>${entry.attempts} tentativas (${difficultyText})</span>
                 `
       } else {
         // Formato antigo (apenas número de tentativas)
@@ -302,7 +295,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createConfetti() {
-    const colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff"]
+    // Cores baseadas no wallpaper
+    const colors = ["#3b82f6", "#ec4899", "#7e22ce", "#06b6d4", "#facc15"]
 
     for (let i = 0; i < 100; i++) {
       const confetti = document.createElement("div")
