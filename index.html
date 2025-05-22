@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Memória</h1>
+        
+        <div class="difficulty-selector">
+            <p>Dificuldade:</p>
+            <div class="difficulty-buttons">
+                <button id="easy-btn" class="difficulty-btn active">Fácil</button>
+                <button id="medium-btn" class="difficulty-btn">Médio</button>
+                <button id="hard-btn" class="difficulty-btn">Difícil</button>
+            </div>
+        </div>
+        
+        <div class="game-info">
+            <p>Tentativas: <span id="attempts">0</span></p>
+            <button id="restart-btn">Reiniciar Jogo</button>
+        </div>
+        
+        <div class="game-board">
+            <!-- As cartas serão geradas pelo JavaScript -->
+        </div>
+        
+        <div id="congratulations" class="hidden">
+            <h2>PARABÉNS!</h2>
+            <p>Você completou o jogo em <span id="final-attempts">0</span> tentativas!</p>
+        </div>
+        
+        <div class="history-container">
+            <h2>Histórico de Tentativas</h2>
+            <ul id="history-list">
+                <!-- O histórico será gerado pelo JavaScript -->
+            </ul>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
