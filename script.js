@@ -9,6 +9,110 @@ document.addEventListener("DOMContentLoaded", () => {
   const easyButton = document.getElementById("easy-btn")
   const mediumButton = document.getElementById("medium-btn")
   const hardButton = document.getElementById("hard-btn")
+  const musicToggleButton = document.getElementById("music-toggle")
+  const soundToggleButton = document.getElementById("sound-toggle")
+
+  // Sistema de áudio simplificado
+  let isMusicEnabled = localStorage.getItem("memoryGameMusicEnabled") === "false" ? false : true
+  let isSoundEnabled = localStorage.getItem("memoryGameSoundEnabled") === "false" ? false : true
+
+  // Criar elemento de áudio para música de fundo
+  const backgroundMusic = new Audio()
+  // Usar o arquivo fundo.mp3 da pasta assets/sound com fallback
+  backgroundMusic.src = "assets/sound/fundo.mp3"
+  backgroundMusic.onerror = () => {
+    console.log("Erro ao carregar música de fundo local, usando fallback")
+    backgroundMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+  }
+  backgroundMusic.loop = true
+  backgroundMusic.volume = 0.3
+
+  // URL do som de vitória fornecido
+  const winSoundUrl = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/win-J6U1VtDtH9cKhqAXxXq0H7OVgRCas8.mp3"
+
+  // Efeitos sonoros
+  const sounds = {
+    flip: new Audio("https://www.soundjay.com/buttons/sounds/button-09.mp3"),
+    match: new Audio("https://www.soundjay.com/buttons/sounds/button-35.mp3"),
+    noMatch: new Audio("https://www.soundjay.com/buttons/sounds/button-10.mp3"),
+    victory: new Audio("assets/sound/win.mp3"), // Usar o arquivo win.mp3 da pasta assets/sound
+    gameStart: new Audio("https://www.soundjay.com/buttons/sounds/button-21.mp3"),
+  }
+
+  // Configurar fallback para o som de vitória
+  sounds.victory.onerror = () => {
+    console.log("Erro ao carregar som de vitória local, usando URL fornecida")
+    sounds.victory.src = winSoundUrl
+  }
+
+  // Ajustar volume dos efeitos sonoros
+  Object.values(sounds).forEach((sound) => {
+    sound.volume = 0.5
+  })
+
+  // Função para tocar som
+  function playSound(sound) {
+    if (isSoundEnabled) {
+      // Clonar o som para permitir sobreposição
+      const soundClone = sound.cloneNode(true)
+      soundClone.volume = sound.volume
+      soundClone.play().catch((error) => {
+        console.log("Erro ao tocar som:", error)
+      })
+    }
+  }
+
+  // Função para iniciar/parar música de fundo
+  function toggleBackgroundMusic() {
+    if (isMusicEnabled) {
+      backgroundMusic.play().catch((error) => {
+        console.log("Erro ao tocar música de fundo:", error)
+      })
+    } else {
+      backgroundMusic.pause()
+    }
+  }
+
+  // Atualizar ícones de áudio
+  function updateAudioIcons() {
+    musicToggleButton.innerHTML = isMusicEnabled ? '<i class="fas fa-music"></i>' : '<i class="fas fa-volume-mute"></i>'
+
+    soundToggleButton.innerHTML = isSoundEnabled
+      ? '<i class="fas fa-volume-up"></i>'
+      : '<i class="fas fa-volume-mute"></i>'
+  }
+
+  // Adicionar event listeners para os botões de áudio
+  musicToggleButton.addEventListener("click", () => {
+    isMusicEnabled = !isMusicEnabled
+    localStorage.setItem("memoryGameMusicEnabled", isMusicEnabled.toString())
+    updateAudioIcons()
+    toggleBackgroundMusic()
+  })
+
+  soundToggleButton.addEventListener("click", () => {
+    isSoundEnabled = !isSoundEnabled
+    localStorage.setItem("memoryGameSoundEnabled", isSoundEnabled.toString())
+    updateAudioIcons()
+
+    // Tocar um som de teste quando ativado
+    if (isSoundEnabled) {
+      playSound(sounds.flip)
+    }
+  })
+
+  // Inicializar ícones de áudio
+  updateAudioIcons()
+
+  // Tentar iniciar música de fundo (se habilitada)
+  if (isMusicEnabled) {
+    // Adicionar listener para interação do usuário para iniciar áudio
+    const startAudio = () => {
+      toggleBackgroundMusic()
+      document.removeEventListener("click", startAudio)
+    }
+    document.addEventListener("click", startAudio)
+  }
 
   // Todas as imagens disponíveis em um único array
   const allImages = [
@@ -31,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
     "assets/img/yone.webp",
     "assets/img/zed.jpg",
     "assets/img/Enemy_Missing_ping.webp",
-    "assets/img/ae4a84c6c525131bea1552615ea673a1.jpeg",
   ]
 
   // Imagens distribuídas para cada dificuldade (serão preenchidas dinamicamente)
@@ -198,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ...difficultyImages.easy,
       ...difficultyImages.medium,
       ...difficultyImages.hard,
-      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp", // Imagem da interrogação
+      "assets/img/Enemy_Missing_ping.webp", // Imagem da interrogação
     ])
   }
 
@@ -209,6 +312,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Distribuir e pré-carregar imagens
     await distributeImages()
+
+    // Tocar som de início de jogo
+    playSound(sounds.gameStart)
 
     // Iniciar o jogo após o carregamento das imagens
     initGame()
@@ -222,6 +328,9 @@ document.addEventListener("DOMContentLoaded", () => {
   restartButton.addEventListener("click", async () => {
     // Mostrar indicador de carregamento
     gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
+
+    // Tocar som de início de jogo
+    playSound(sounds.gameStart)
 
     // Redistribuir e pré-carregar imagens
     await distributeImages()
@@ -250,6 +359,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Mostrar indicador de carregamento
     gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
+
+    // Tocar som de início de jogo
+    playSound(sounds.gameStart)
 
     // Redistribuir e pré-carregar imagens
     await distributeImages()
@@ -313,15 +425,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const imageStatus = preloadedImages[card.imageUrl]
 
       // Usar uma imagem de fallback se a imagem original falhou no carregamento
-      const imageUrl =
-        imageStatus === false
-          ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp"
-          : card.imageUrl
+      const imageUrl = imageStatus === false ? "assets/img/Enemy_Missing_ping.webp" : card.imageUrl
 
       cardElement.innerHTML = `
                 <div class="card-inner">
                     <div class="card-front">
-                        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp" alt="?" class="card-question">
+                        <img src="assets/img/Enemy_Missing_ping.webp" alt="?" class="card-question">
                     </div>
                     <div class="card-back">
                         <img src="${imageUrl}" alt="Card Image" class="card-image">
@@ -344,6 +453,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (isProcessing || flippedCards.length >= 2 || cards[index].isFlipped || cards[index].isMatched) {
       return
     }
+
+    // Tocar som de virar carta
+    playSound(sounds.flip)
 
     // Virar a carta
     cards[index].isFlipped = true
@@ -370,6 +482,9 @@ document.addEventListener("DOMContentLoaded", () => {
         secondCard.isMatched = true
         matchedPairs++
 
+        // Tocar som de combinação
+        playSound(sounds.match)
+
         // Resetar para próxima jogada
         flippedCards = []
         isProcessing = false
@@ -379,7 +494,10 @@ document.addEventListener("DOMContentLoaded", () => {
           gameCompleted()
         }
       } else {
-        // Cartas não combinam, virar de volta após um tempo
+        // Cartas não combinam, tocar som de erro
+        playSound(sounds.noMatch)
+
+        // Virar de volta após um tempo
         setTimeout(() => {
           cards[firstIndex].isFlipped = false
           cards[secondIndex].isFlipped = false
@@ -395,6 +513,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function gameCompleted() {
+    // Tocar som de vitória
+    playSound(sounds.victory)
+
     // Mostrar mensagem de parabéns
     finalAttemptsElement.textContent = attempts
     congratulationsElement.classList.remove("hidden")
