@@ -1,337 +1,381 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // Elementos do DOM
-  const gameBoard = document.querySelector(".game-board")
-  const attemptsElement = document.getElementById("attempts")
-  const finalAttemptsElement = document.getElementById("final-attempts")
-  const congratulationsElement = document.getElementById("congratulations")
-  const restartButton = document.getElementById("restart-btn")
-  const historyList = document.getElementById("history-list")
-  const easyButton = document.getElementById("easy-btn")
-  const mediumButton = document.getElementById("medium-btn")
-  const hardButton = document.getElementById("hard-btn")
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Montserrat", "Arial", sans-serif;
+}
 
-  // Imagens organizadas por nível de dificuldade
-  const difficultyImages = {
-    easy: [
-      "assets/img/maxresdefault.jpg",
-      "assets/img/Chip_Base_Tier_1.webp",
-      "assets/img/Chibi_Malphite_Base_Tier_1.webp",
-    ],
-    medium: [
-      // Você pode adicionar imagens específicas para o nível médio aqui
-      // Por enquanto, vamos usar as mesmas do nível fácil como exemplo
-      "assets/img/Chibi_Ekko_Firelight_Tier_1.webp",
-      "assets/img/Chibi_Jinx_Base_Tier_1.webp",
-      "assets/img/Poro_Santa_Tier_1.webp",
-      // Espaço para adicionar mais 3 imagens para completar os 6 pares
-      "assets/img/Chibi_Miss_Fortune_Base_Tier_1.webp",
-      "assets/img/Chibi_Riven_Dawnbringer_Tier_1.webp",
-      "assets/img/Chibi_Seraphine_KDA_ALL_OUT_Tier_1.webp",
-    ],
-    hard: [
-      // Você pode adicionar imagens específicas para o nível difícil aqui
-      // Por enquanto, vamos usar as mesmas do nível fácil como exemplo
-      "assets/img/Chibi_Vi_Base_Tier_1.webp",
-      "assets/img/chibi-poro-rider-sejuanni-for-fight-of-the-golden-spatula-v0-mgnetmofkt5e1.webp",
-      "assets/img/Chibi_Akali_KDA_ALL_OUT_Tier_1.webp",
-      // Espaço para adicionar mais 6 imagens para completar os 9 pares
-      "assets/img/chibi_aatrox.webp",
-      "assets/img/poro.png",
-      "assets/img/Poro_Bee_Tier_1.webp",
-      "assets/img/Chibi_Caitlyn_Base_Tier_1.webp",
-      "assets/img/yone.webp",
-      "assets/img/zed.jpg",
-    ],
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Orbitron:wght@500;700&display=swap");
+
+:root {
+  --primary-blue: #1e3a8a;
+  --primary-blue-light: #3b82f6;
+  --primary-purple: #7e22ce;
+  --primary-pink: #ec4899;
+  --primary-cyan: #06b6d4;
+  --primary-yellow: #facc15;
+  --bg-dark: rgba(13, 17, 38, 0.85);
+  --text-light: #f8fafc;
+  --card-gradient: linear-gradient(135deg, #ec4899, #7e22ce);
+  --btn-gradient-blue: linear-gradient(to right, #3b82f6, #1e3a8a);
+  --btn-gradient-pink: linear-gradient(to right, #ec4899, #be185d);
+  --btn-gradient-green: linear-gradient(to right, #06b6d4, #0284c7);
+  --success-gradient: linear-gradient(to right, rgba(250, 204, 21, 0.3), rgba(234, 88, 12, 0.3));
+}
+
+body {
+  min-height: 100vh;
+  background-image: url("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ae4a84c6c525131bea1552615ea673a1-GM8o2UUJNfRv5MwWEvt4GpdfNpkLIl.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: var(--text-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  max-width: 900px;
+  width: 100%;
+  background-color: var(--bg-dark);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 2.5rem;
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  color: var(--text-light);
+  text-shadow: 0 0 10px var(--primary-pink), 0 0 20px var(--primary-purple);
+  letter-spacing: 2px;
+}
+
+.difficulty-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.difficulty-selector p {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--primary-cyan);
+  margin-right: 10px;
+}
+
+.difficulty-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.difficulty-btn {
+  border: none;
+  color: var(--text-light);
+  padding: 8px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+#easy-btn {
+  background: var(--btn-gradient-blue);
+}
+
+#medium-btn {
+  background: var(--btn-gradient-green);
+}
+
+#hard-btn {
+  background: var(--btn-gradient-pink);
+}
+
+.difficulty-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.difficulty-btn.active {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px var(--primary-pink);
+}
+
+.game-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.game-info p {
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--primary-cyan);
+  background-color: rgba(6, 182, 212, 0.1);
+  padding: 8px 15px;
+  border-radius: 50px;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+#restart-btn {
+  background: var(--btn-gradient-pink);
+  border: none;
+  color: var(--text-light);
+  padding: 10px 20px;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+}
+
+#restart-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+
+.game-board {
+  display: grid;
+  gap: 15px;
+  margin-bottom: 30px;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.game-board.easy {
+  grid-template-columns: repeat(3, minmax(100px, 150px));
+  grid-template-rows: repeat(2, minmax(100px, 150px));
+}
+
+.game-board.medium {
+  grid-template-columns: repeat(4, minmax(80px, 120px));
+  grid-template-rows: repeat(3, minmax(80px, 120px));
+}
+
+.game-board.hard {
+  grid-template-columns: repeat(4, minmax(70px, 100px));
+  grid-template-rows: repeat(4, minmax(70px, 100px));
+}
+
+.card {
+  aspect-ratio: 1;
+  perspective: 1000px;
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.card-front {
+  background: var(--card-gradient);
+  font-size: 2.5rem;
+  color: var(--text-light);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-question {
+  width: 60%;
+  height: auto;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0% {
+    filter: drop-shadow(0 0 3px var(--primary-yellow));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px var(--primary-yellow));
+  }
+  100% {
+    filter: drop-shadow(0 0 3px var(--primary-yellow));
+  }
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  background-color: white;
+  overflow: hidden;
+}
+
+.card-back img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#congratulations {
+  text-align: center;
+  margin: 20px 0;
+  padding: 20px;
+  background: var(--success-gradient);
+  border-radius: 10px;
+  animation: pulse 1.5s infinite;
+}
+
+#congratulations h2 {
+  font-family: "Orbitron", sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  color: var(--primary-yellow);
+  text-shadow: 0 0 10px var(--primary-yellow);
+}
+
+#congratulations p {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hidden {
+  display: none;
+}
+
+.history-container {
+  margin-top: 20px;
+  background-color: rgba(30, 58, 138, 0.4);
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.history-container h2 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+  font-family: "Orbitron", sans-serif;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--primary-cyan);
+}
+
+#history-list {
+  list-style-type: none;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#history-list li {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+#history-list li:last-child {
+  border-bottom: none;
+}
+
+/* Confetti animation */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  opacity: 0.7;
+  animation: fall linear forwards;
+  z-index: 1000;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .game-controls {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  // Estado do jogo
-  let cards = []
-  let flippedCards = []
-  let attempts = 0
-  let matchedPairs = 0
-  let isProcessing = false
-  const attemptHistory = JSON.parse(localStorage.getItem("memoryGameHistory")) || []
-  let currentDifficulty = "easy" // Dificuldade padrão
-
-  // Configurações de dificuldade
-  const difficultySettings = {
-    easy: { pairs: 3 },
-    medium: { pairs: 6 },
-    hard: { pairs: 8 },
+  .game-info {
+    width: 100%;
+    justify-content: space-between;
   }
 
-  // Inicializar o jogo
-  initGame()
-  updateHistoryDisplay()
-
-  // Event listeners
-  restartButton.addEventListener("click", restartGame)
-  easyButton.addEventListener("click", () => setDifficulty("easy"))
-  mediumButton.addEventListener("click", () => setDifficulty("medium"))
-  hardButton.addEventListener("click", () => setDifficulty("hard"))
-
-  // Funções
-  function setDifficulty(difficulty) {
-    // Atualizar botões de dificuldade
-    easyButton.classList.remove("active")
-    mediumButton.classList.remove("active")
-    hardButton.classList.remove("active")
-
-    document.getElementById(`${difficulty}-btn`).classList.add("active")
-
-    currentDifficulty = difficulty
-
-    // Ajustar a classe do tabuleiro com base na dificuldade
-    gameBoard.className = "game-board " + difficulty
-
-    // Reiniciar o jogo com a nova dificuldade
-    restartGame()
+  .game-board.easy {
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  function initGame() {
-    // Resetar estado
-    cards = []
-    flippedCards = []
-    attempts = 0
-    matchedPairs = 0
-    isProcessing = false
-    attemptsElement.textContent = "0"
-    congratulationsElement.classList.add("hidden")
-    gameBoard.innerHTML = ""
-
-    // Ajustar a classe do tabuleiro com base na dificuldade atual
-    gameBoard.className = "game-board " + currentDifficulty
-
-    // Obter número de pares com base na dificuldade
-    const numPairs = difficultySettings[currentDifficulty].pairs
-
-    // Obter imagens para o nível de dificuldade atual
-    const currentImages = difficultyImages[currentDifficulty]
-
-    // Verificar se temos imagens suficientes para o nível
-    if (currentImages.length < numPairs) {
-      console.warn(`Não há imagens suficientes para o nível ${currentDifficulty}. Usando imagens repetidas.`)
-    }
-
-    // Criar pares de cartas
-    const cardPairs = []
-
-    // Selecionar as imagens para este jogo (até o número de pares necessários)
-    const selectedImages = []
-    for (let i = 0; i < numPairs; i++) {
-      // Usar imagens disponíveis de forma cíclica se não houver suficientes
-      const imageIndex = i % currentImages.length
-      selectedImages.push(currentImages[imageIndex])
-    }
-
-    // Embaralhar as imagens selecionadas para variar a cada jogo
-    const shuffledImages = shuffleArray([...selectedImages])
-
-    // Criar os pares de cartas
-    shuffledImages.forEach((imageUrl, index) => {
-      cardPairs.push(
-        { imageUrl, isFlipped: false, isMatched: false, pairId: index },
-        { imageUrl, isFlipped: false, isMatched: false, pairId: index },
-      )
-    })
-
-    // Embaralhar as cartas
-    cards = shuffleArray(cardPairs)
-
-    // Renderizar cartas no tabuleiro
-    renderCards()
+  .game-board.medium {
+    grid-template-columns: repeat(3, 1fr);
   }
 
-  function renderCards() {
-    gameBoard.innerHTML = ""
+  .game-board.hard {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 
-    cards.forEach((card, index) => {
-      const cardElement = document.createElement("div")
-      cardElement.className = "card"
-      cardElement.dataset.index = index
-
-      cardElement.innerHTML = `
-                <div class="card-inner">
-                    <div class="card-front">
-                        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp" alt="?" class="card-question">
-                    </div>
-                    <div class="card-back">
-                        <img src="${card.imageUrl}" alt="Card Image">
-                    </div>
-                </div>
-            `
-
-      // Adicionar classe 'flipped' se a carta já estiver virada ou combinada
-      if (card.isFlipped || card.isMatched) {
-        cardElement.classList.add("flipped")
-      }
-
-      cardElement.addEventListener("click", () => flipCard(index))
-      gameBoard.appendChild(cardElement)
-    })
+@media (max-width: 480px) {
+  .game-board.easy,
+  .game-board.medium,
+  .game-board.hard {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 
-  function flipCard(index) {
-    // Impedir virar mais de 2 cartas ou cartas já viradas/combinadas ou durante processamento
-    if (isProcessing || flippedCards.length >= 2 || cards[index].isFlipped || cards[index].isMatched) {
-      return
-    }
-
-    // Virar a carta
-    cards[index].isFlipped = true
-    flippedCards.push(index)
-
-    // Atualizar a visualização
-    document.querySelector(`.card[data-index="${index}"]`).classList.add("flipped")
-
-    // Verificar se duas cartas foram viradas
-    if (flippedCards.length === 2) {
-      isProcessing = true
-      attempts++
-      attemptsElement.textContent = attempts
-
-      // Verificar se as cartas são iguais
-      const [firstIndex, secondIndex] = flippedCards
-      const firstCard = cards[firstIndex]
-      const secondCard = cards[secondIndex]
-
-      // Verificar se as cartas têm o mesmo pairId
-      if (firstCard.pairId === secondCard.pairId) {
-        // Cartas combinam
-        firstCard.isMatched = true
-        secondCard.isMatched = true
-        matchedPairs++
-
-        // Resetar para próxima jogada
-        flippedCards = []
-        isProcessing = false
-
-        // Verificar se o jogo foi concluído
-        if (matchedPairs === difficultySettings[currentDifficulty].pairs) {
-          gameCompleted()
-        }
-      } else {
-        // Cartas não combinam, virar de volta após um tempo
-        setTimeout(() => {
-          cards[firstIndex].isFlipped = false
-          cards[secondIndex].isFlipped = false
-
-          document.querySelector(`.card[data-index="${firstIndex}"]`).classList.remove("flipped")
-          document.querySelector(`.card[data-index="${secondIndex}"]`).classList.remove("flipped")
-
-          flippedCards = []
-          isProcessing = false
-        }, 1000)
-      }
-    }
+  .card-front {
+    font-size: 1.5rem;
   }
 
-  function gameCompleted() {
-    // Mostrar mensagem de parabéns
-    finalAttemptsElement.textContent = attempts
-    congratulationsElement.classList.remove("hidden")
-
-    // Adicionar ao histórico com informação de dificuldade
-    const historyEntry = {
-      attempts: attempts,
-      difficulty: currentDifficulty,
-      date: new Date().toISOString(),
-    }
-
-    attemptHistory.push(historyEntry)
-    localStorage.setItem("memoryGameHistory", JSON.stringify(attemptHistory))
-
-    // Atualizar exibição do histórico
-    updateHistoryDisplay()
-
-    // Criar efeito de confete
-    createConfetti()
+  h1 {
+    font-size: 1.8rem;
   }
 
-  function restartGame() {
-    initGame()
+  .difficulty-buttons {
+    flex-wrap: wrap;
   }
-
-  function updateHistoryDisplay() {
-    historyList.innerHTML = ""
-
-    if (attemptHistory.length === 0) {
-      const emptyItem = document.createElement("li")
-      emptyItem.textContent = "Nenhuma partida concluída ainda."
-      historyList.appendChild(emptyItem)
-      return
-    }
-
-    // Mostrar apenas as últimas 10 partidas para não sobrecarregar a interface
-    const recentHistory = attemptHistory.slice(-10)
-
-    recentHistory.forEach((entry, index) => {
-      const historyItem = document.createElement("li")
-
-      // Verificar se o entry é um objeto (novo formato) ou um número (formato antigo)
-      if (typeof entry === "object") {
-        // Formatar a dificuldade para exibição
-        const difficultyText =
-          {
-            easy: "Fácil",
-            medium: "Médio",
-            hard: "Difícil",
-          }[entry.difficulty] || entry.difficulty
-
-        historyItem.innerHTML = `
-                    <span>Partida ${attemptHistory.length - (recentHistory.length - 1 - index)}:</span>
-                    <span>${entry.attempts} tentativas (${difficultyText})</span>
-                `
-      } else {
-        // Formato antigo (apenas número de tentativas)
-        historyItem.innerHTML = `
-                    <span>Partida ${attemptHistory.length - (recentHistory.length - 1 - index)}:</span>
-                    <span>${entry} tentativas</span>
-                `
-      }
-
-      historyList.appendChild(historyItem)
-    })
-  }
-
-  function createConfetti() {
-    // Cores baseadas no wallpaper
-    const colors = ["#3b82f6", "#ec4899", "#7e22ce", "#06b6d4", "#facc15"]
-
-    for (let i = 0; i < 100; i++) {
-      const confetti = document.createElement("div")
-      confetti.className = "confetti"
-
-      // Posição aleatória
-      const left = Math.random() * 100
-
-      // Estilo aleatório
-      confetti.style.left = `${left}%`
-      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]
-      confetti.style.width = `${Math.random() * 10 + 5}px`
-      confetti.style.height = `${Math.random() * 10 + 5}px`
-      confetti.style.opacity = Math.random() * 0.7 + 0.3
-
-      // Animação com duração aleatória
-      const duration = Math.random() * 3 + 2
-      confetti.style.animation = `fall ${duration}s linear forwards`
-
-      document.body.appendChild(confetti)
-
-      // Remover após a animação
-      setTimeout(() => {
-        confetti.remove()
-      }, duration * 1000)
-    }
-  }
-
-  // Função auxiliar para embaralhar array
-  function shuffleArray(array) {
-    const newArray = [...array]
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
-    }
-    return newArray
-  }
-})
+}
