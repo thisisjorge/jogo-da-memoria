@@ -149,27 +149,43 @@ h1 {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
+/* Modificar as regras de grid para melhor responsividade */
 .game-board {
   display: grid;
   gap: 15px;
   margin-bottom: 30px;
   justify-content: center;
   max-width: 100%;
+  width: 100%;
+  min-height: 200px; /* Altura mínima para o tabuleiro */
 }
 
 .game-board.easy {
-  grid-template-columns: repeat(3, minmax(100px, 150px));
-  grid-template-rows: repeat(2, minmax(100px, 150px));
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  grid-template-rows: repeat(2, minmax(100px, 1fr));
 }
 
 .game-board.medium {
-  grid-template-columns: repeat(4, minmax(80px, 120px));
-  grid-template-rows: repeat(3, minmax(80px, 120px));
+  grid-template-columns: repeat(4, minmax(80px, 1fr));
+  grid-template-rows: repeat(3, minmax(80px, 1fr));
 }
 
 .game-board.hard {
-  grid-template-columns: repeat(4, minmax(70px, 100px));
-  grid-template-rows: repeat(4, minmax(70px, 100px));
+  grid-template-columns: repeat(4, minmax(70px, 1fr));
+  grid-template-rows: repeat(4, minmax(70px, 1fr));
+}
+
+/* Indicador de carregamento */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 200px;
+  font-size: 1.2rem;
+  color: var(--primary-cyan);
+  text-align: center;
+  animation: pulse 1.5s infinite;
 }
 
 .card {
@@ -178,6 +194,7 @@ h1 {
   cursor: pointer;
   border-radius: 10px;
   overflow: hidden;
+  will-change: transform; /* Otimização para animações */
 }
 
 .card-inner {
@@ -186,6 +203,7 @@ h1 {
   height: 100%;
   transition: transform 0.6s;
   transform-style: preserve-3d;
+  will-change: transform; /* Otimização para animações */
 }
 
 .card.flipped .card-inner {
@@ -203,6 +221,7 @@ h1 {
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  will-change: transform; /* Otimização para animações */
 }
 
 .card-front {
@@ -241,6 +260,7 @@ h1 {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block; /* Evita espaço em branco abaixo da imagem */
 }
 
 #congratulations {
@@ -335,15 +355,22 @@ h1 {
 }
 
 /* Responsividade */
+/* Melhorar a responsividade para dispositivos móveis */
 @media (max-width: 768px) {
-  .game-controls {
-    flex-direction: column;
-    align-items: flex-start;
+  .container {
+    padding: 15px;
   }
 
   .game-info {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+
+  .game-info p,
+  #restart-btn {
     width: 100%;
-    justify-content: space-between;
+    text-align: center;
   }
 
   .game-board.easy {
@@ -352,30 +379,75 @@ h1 {
 
   .game-board.medium {
     grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
   }
 
   .game-board.hard {
     grid-template-columns: repeat(4, 1fr);
   }
-}
 
-@media (max-width: 480px) {
-  .game-board.easy,
-  .game-board.medium,
-  .game-board.hard {
-    grid-template-columns: repeat(2, 1fr);
+  .difficulty-selector {
+    flex-direction: column;
     gap: 10px;
   }
 
-  .card-front {
+  .difficulty-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+  }
+
+  .game-board.easy {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+
+  .game-board.medium {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+  }
+
+  .game-board.hard {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 10px;
+  }
+
+  .card {
+    min-height: 80px;
+  }
+
+  #congratulations {
+    padding: 15px 10px;
+  }
+
+  #congratulations h2 {
     font-size: 1.5rem;
   }
 
-  h1 {
-    font-size: 1.8rem;
+  .history-container {
+    padding: 15px;
   }
 
-  .difficulty-buttons {
-    flex-wrap: wrap;
+  .history-container h2 {
+    font-size: 1.3rem;
   }
+}
+
+/* Ajustar o tamanho das cartas para ocupar melhor o espaço */
+.card {
+  aspect-ratio: 1;
+  perspective: 1000px;
+  cursor: pointer;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  min-height: 100px;
 }
