@@ -7,7 +7,11 @@
 
 body {
   min-height: 100vh;
-  background: linear-gradient(to bottom, #8a2be2, #4b0082);
+  background-image: linear-gradient(to bottom, rgba(138, 43, 226, 0.2), rgba(75, 0, 130, 0.3)),
+    url("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ae4a84c6c525131bea1552615ea673a1-GM8o2UUJNfRv5MwWEvt4GpdfNpkLIl.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: white;
   display: flex;
   justify-content: center;
@@ -18,11 +22,12 @@ body {
 .container {
   max-width: 900px;
   width: 100%;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(5px);
   border-radius: 15px;
   padding: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 h1 {
@@ -31,16 +36,6 @@ h1 {
   font-size: 2.5rem;
   color: #f8f8f8;
   text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-}
-
-.game-description {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 1.1rem;
-  color: #f8f8f8;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .difficulty-selector {
@@ -71,7 +66,7 @@ h1 {
   cursor: pointer;
   font-weight: bold;
   transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .difficulty-btn:hover {
@@ -213,7 +208,6 @@ button:active {
   list-style-type: none;
   max-height: 200px;
   overflow-y: auto;
-  padding-right: 10px;
 }
 
 #history-list li {
@@ -221,14 +215,6 @@ button:active {
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: space-between;
-  align-items: center;
-}
-
-#history-list li span:last-child {
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.9em;
 }
 
 #history-list li:last-child {
