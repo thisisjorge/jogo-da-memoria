@@ -10,39 +10,39 @@ document.addEventListener("DOMContentLoaded", () => {
   const mediumButton = document.getElementById("medium-btn")
   const hardButton = document.getElementById("hard-btn")
 
-  // Imagens organizadas por nível de dificuldade
-  const difficultyImages = {
-    easy: [
-      "assets/img/maxresdefault.jpg",
-      "assets/img/Chip_Base_Tier_1.webp",
-      "assets/img/Chibi_Malphite_Base_Tier_1.webp",
-    ],
-    medium: [
-      // Você pode adicionar imagens específicas para o nível médio aqui
-      // Por enquanto, vamos usar as mesmas do nível fácil como exemplo
-      "assets/img/Chibi_Ekko_Firelight_Tier_1.webp",
-      "assets/img/Chibi_Jinx_Base_Tier_1.webp",
-      "assets/img/Poro_Santa_Tier_1.webp",
-      // Espaço para adicionar mais 3 imagens para completar os 6 pares
-      "assets/img/Chibi_Miss_Fortune_Base_Tier_1.webp",
-      "assets/img/Chibi_Riven_Dawnbringer_Tier_1.webp",
-      "assets/img/Chibi_Seraphine_KDA_ALL_OUT_Tier_1.webp",
-    ],
-    hard: [
-      // Você pode adicionar imagens específicas para o nível difícil aqui
-      // Por enquanto, vamos usar as mesmas do nível fácil como exemplo
-      "assets/img/Chibi_Vi_Base_Tier_1.webp",
-      "assets/img/chibi-poro-rider-sejuanni-for-fight-of-the-golden-spatula-v0-mgnetmofkt5e1.webp",
-      "assets/img/Chibi_Akali_KDA_ALL_OUT_Tier_1.webp",
-      // Espaço para adicionar mais 6 imagens para completar os 9 pares
-      "assets/img/chibi_aatrox.webp",
-      "assets/img/poro.png",
-      "assets/img/Poro_Bee_Tier_1.webp",
-      "assets/img/Chibi_Caitlyn_Base_Tier_1.webp",
-      "assets/img/yone.webp",
-      "assets/img/zed.jpg",
-    ],
+  // Todas as imagens disponíveis em um único array
+  const allImages = [
+    "assets/img/maxresdefault.jpg",
+    "assets/img/Chip_Base_Tier_1.webp",
+    "assets/img/Chibi_Malphite_Base_Tier_1.webp",
+    "assets/img/Chibi_Ekko_Firelight_Tier_1.webp",
+    "assets/img/Chibi_Jinx_Base_Tier_1.webp",
+    "assets/img/Poro_Santa_Tier_1.webp",
+    "assets/img/Chibi_Miss_Fortune_Base_Tier_1.webp",
+    "assets/img/Chibi_Riven_Dawnbringer_Tier_1.webp",
+    "assets/img/Chibi_Seraphine_KDA_ALL_OUT_Tier_1.webp",
+    "assets/img/Chibi_Vi_Base_Tier_1.webp",
+    "assets/img/chibi-poro-rider-sejuanni-for-fight-of-the-golden-spatula-v0-mgnetmofkt5e1.webp",
+    "assets/img/Chibi_Akali_KDA_ALL_OUT_Tier_1.webp",
+    "assets/img/chibi_aatrox.webp",
+    "assets/img/poro.png",
+    "assets/img/Poro_Bee_Tier_1.webp",
+    "assets/img/Chibi_Caitlyn_Base_Tier_1.webp",
+    "assets/img/yone.webp",
+    "assets/img/zed.jpg",
+    "assets/img/Enemy_Missing_ping.webp",
+    "assets/img/ae4a84c6c525131bea1552615ea673a1.jpeg",
+  ]
+
+  // Imagens distribuídas para cada dificuldade (serão preenchidas dinamicamente)
+  let difficultyImages = {
+    easy: [],
+    medium: [],
+    hard: [],
   }
+
+  // Cache de imagens pré-carregadas
+  const preloadedImages = {}
 
   // Estado do jogo
   let cards = []
@@ -60,18 +60,182 @@ document.addEventListener("DOMContentLoaded", () => {
     hard: { pairs: 8 },
   }
 
+  // Função para pré-carregar imagens
+  function preloadImages(imageUrls) {
+    return new Promise((resolve) => {
+      let loadedCount = 0
+      const totalImages = imageUrls.length
+
+      // Se não houver imagens para carregar, resolva imediatamente
+      if (totalImages === 0) {
+        resolve()
+        return
+      }
+
+      imageUrls.forEach((url) => {
+        // Se a imagem já estiver no cache, não carregue novamente
+        if (preloadedImages[url]) {
+          loadedCount++
+          if (loadedCount === totalImages) {
+            resolve()
+          }
+          return
+        }
+
+        const img = new Image()
+
+        img.onload = () => {
+          preloadedImages[url] = true
+          loadedCount++
+          if (loadedCount === totalImages) {
+            resolve()
+          }
+        }
+
+        img.onerror = () => {
+          console.warn(`Falha ao carregar imagem: ${url}`)
+          // Mesmo com erro, contamos como carregada para não travar o jogo
+          preloadedImages[url] = false
+          loadedCount++
+          if (loadedCount === totalImages) {
+            resolve()
+          }
+        }
+
+        img.src = url
+      })
+    })
+  }
+
+  // Função de embaralhamento melhorada para garantir uma mistura mais completa
+  function thoroughShuffle(array) {
+    // Primeiro embaralhamento - Fisher-Yates shuffle
+    let newArray = [...array]
+    for (let i = newArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
+    }
+
+    // Segundo embaralhamento - Embaralhamento adicional para garantir maior aleatoriedade
+    newArray = newArray.sort(() => Math.random() - 0.5)
+
+    // Terceiro embaralhamento - Divisão e intercalação
+    const half = Math.floor(newArray.length / 2)
+    const firstHalf = newArray.slice(0, half)
+    const secondHalf = newArray.slice(half)
+
+    // Intercalar as duas metades de forma aleatória
+    const result = []
+    while (firstHalf.length > 0 || secondHalf.length > 0) {
+      // Decidir aleatoriamente de qual metade pegar o próximo elemento
+      if (firstHalf.length === 0) {
+        result.push(secondHalf.shift())
+      } else if (secondHalf.length === 0) {
+        result.push(firstHalf.shift())
+      } else if (Math.random() < 0.5) {
+        result.push(firstHalf.shift())
+      } else {
+        result.push(secondHalf.shift())
+      }
+    }
+
+    return result
+  }
+
+  // Distribuir imagens aleatoriamente para cada nível de dificuldade
+  function distributeImages() {
+    // Embaralhar todas as imagens disponíveis com o embaralhamento melhorado
+    const shuffledImages = thoroughShuffle([...allImages])
+
+    // Limpar as imagens anteriores
+    difficultyImages = {
+      easy: [],
+      medium: [],
+      hard: [],
+    }
+
+    // Estratégia de distribuição alternativa para garantir maior separação
+    // Selecionar imagens em intervalos para cada dificuldade
+
+    // Calcular o total de pares necessários
+    const totalPairsNeeded =
+      difficultySettings.easy.pairs + difficultySettings.medium.pairs + difficultySettings.hard.pairs
+
+    // Verificar se temos imagens suficientes
+    if (shuffledImages.length < totalPairsNeeded) {
+      console.warn("Não há imagens suficientes para todos os níveis. Algumas imagens serão repetidas.")
+    }
+
+    // Criar uma cópia do array embaralhado para trabalhar
+    const workingImages = [...shuffledImages]
+
+    // Se não tivermos imagens suficientes, duplicar algumas
+    while (workingImages.length < totalPairsNeeded) {
+      workingImages.push(...shuffledImages.slice(0, totalPairsNeeded - workingImages.length))
+    }
+
+    // Embaralhar novamente após possível duplicação
+    const finalImages = thoroughShuffle(workingImages)
+
+    // Distribuir para cada nível
+    difficultyImages.easy = finalImages.slice(0, difficultySettings.easy.pairs)
+    difficultyImages.medium = finalImages.slice(
+      difficultySettings.easy.pairs,
+      difficultySettings.easy.pairs + difficultySettings.medium.pairs,
+    )
+    difficultyImages.hard = finalImages.slice(
+      difficultySettings.easy.pairs + difficultySettings.medium.pairs,
+      totalPairsNeeded,
+    )
+
+    // Embaralhar novamente cada conjunto de imagens para garantir que não haja padrões
+    difficultyImages.easy = thoroughShuffle(difficultyImages.easy)
+    difficultyImages.medium = thoroughShuffle(difficultyImages.medium)
+    difficultyImages.hard = thoroughShuffle(difficultyImages.hard)
+
+    // Pré-carregar todas as imagens para evitar problemas de carregamento durante o jogo
+    return preloadImages([
+      ...difficultyImages.easy,
+      ...difficultyImages.medium,
+      ...difficultyImages.hard,
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp", // Imagem da interrogação
+    ])
+  }
+
   // Inicializar o jogo
-  initGame()
-  updateHistoryDisplay()
+  async function initializeGame() {
+    // Mostrar indicador de carregamento
+    gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
+
+    // Distribuir e pré-carregar imagens
+    await distributeImages()
+
+    // Iniciar o jogo após o carregamento das imagens
+    initGame()
+    updateHistoryDisplay()
+  }
+
+  // Iniciar o processo
+  initializeGame()
 
   // Event listeners
-  restartButton.addEventListener("click", restartGame)
+  restartButton.addEventListener("click", async () => {
+    // Mostrar indicador de carregamento
+    gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
+
+    // Redistribuir e pré-carregar imagens
+    await distributeImages()
+
+    // Reiniciar o jogo
+    restartGame()
+  })
+
   easyButton.addEventListener("click", () => setDifficulty("easy"))
   mediumButton.addEventListener("click", () => setDifficulty("medium"))
   hardButton.addEventListener("click", () => setDifficulty("hard"))
 
   // Funções
-  function setDifficulty(difficulty) {
+  async function setDifficulty(difficulty) {
     // Atualizar botões de dificuldade
     easyButton.classList.remove("active")
     mediumButton.classList.remove("active")
@@ -83,6 +247,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Ajustar a classe do tabuleiro com base na dificuldade
     gameBoard.className = "game-board " + difficulty
+
+    // Mostrar indicador de carregamento
+    gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
+
+    // Redistribuir e pré-carregar imagens
+    await distributeImages()
 
     // Reiniciar o jogo com a nova dificuldade
     restartGame()
@@ -116,27 +286,16 @@ document.addEventListener("DOMContentLoaded", () => {
     // Criar pares de cartas
     const cardPairs = []
 
-    // Selecionar as imagens para este jogo (até o número de pares necessários)
-    const selectedImages = []
-    for (let i = 0; i < numPairs; i++) {
-      // Usar imagens disponíveis de forma cíclica se não houver suficientes
-      const imageIndex = i % currentImages.length
-      selectedImages.push(currentImages[imageIndex])
-    }
-
-    // Embaralhar as imagens selecionadas para variar a cada jogo
-    const shuffledImages = shuffleArray([...selectedImages])
-
     // Criar os pares de cartas
-    shuffledImages.forEach((imageUrl, index) => {
+    currentImages.forEach((imageUrl, index) => {
       cardPairs.push(
         { imageUrl, isFlipped: false, isMatched: false, pairId: index },
         { imageUrl, isFlipped: false, isMatched: false, pairId: index },
       )
     })
 
-    // Embaralhar as cartas
-    cards = shuffleArray(cardPairs)
+    // Embaralhar as cartas com o embaralhamento melhorado
+    cards = thoroughShuffle(cardPairs)
 
     // Renderizar cartas no tabuleiro
     renderCards()
@@ -150,13 +309,22 @@ document.addEventListener("DOMContentLoaded", () => {
       cardElement.className = "card"
       cardElement.dataset.index = index
 
+      // Verificar se a imagem foi pré-carregada com sucesso
+      const imageStatus = preloadedImages[card.imageUrl]
+
+      // Usar uma imagem de fallback se a imagem original falhou no carregamento
+      const imageUrl =
+        imageStatus === false
+          ? "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp"
+          : card.imageUrl
+
       cardElement.innerHTML = `
                 <div class="card-inner">
                     <div class="card-front">
                         <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Enemy_Missing_ping-jBirKghYVOAJd5pIVmtk9c8nBgOMtP.webp" alt="?" class="card-question">
                     </div>
                     <div class="card-back">
-                        <img src="${card.imageUrl}" alt="Card Image">
+                        <img src="${imageUrl}" alt="Card Image" class="card-image">
                     </div>
                 </div>
             `
@@ -226,7 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function gameCompleted() {
+  async function gameCompleted() {
     // Mostrar mensagem de parabéns
     finalAttemptsElement.textContent = attempts
     congratulationsElement.classList.remove("hidden")
@@ -246,6 +414,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Criar efeito de confete
     createConfetti()
+
+    // Redistribuir imagens para o próximo jogo
+    await distributeImages()
+
+    // Reiniciar o jogo automaticamente após 3 segundos
+    setTimeout(() => {
+      congratulationsElement.classList.add("hidden")
+      initGame()
+    }, 3000)
   }
 
   function restartGame() {
@@ -323,15 +500,5 @@ document.addEventListener("DOMContentLoaded", () => {
         confetti.remove()
       }, duration * 1000)
     }
-  }
-
-  // Função auxiliar para embaralhar array
-  function shuffleArray(array) {
-    const newArray = [...array]
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1))
-      ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
-    }
-    return newArray
   }
 })
