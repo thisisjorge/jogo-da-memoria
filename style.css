@@ -150,12 +150,23 @@ h1 {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
-/* Controles de áudio */
+/* Controles de áudio melhorados */
 .audio-controls {
   display: flex;
   justify-content: center;
-  gap: 15px;
+  gap: 30px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.audio-control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: rgba(30, 58, 138, 0.2);
+  padding: 10px 15px;
+  border-radius: 50px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .audio-btn {
@@ -178,8 +189,68 @@ h1 {
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
 }
 
+.audio-btn.muted {
+  background: linear-gradient(to right, #6b7280, #4b5563);
+  opacity: 0.7;
+}
+
 .audio-btn i {
   font-size: 1.2rem;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.volume-control i {
+  color: var(--primary-cyan);
+  font-size: 0.9rem;
+}
+
+.volume-slider {
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-cyan);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  background: var(--primary-blue-light);
+  transform: scale(1.1);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary-cyan);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.volume-slider::-moz-range-thumb:hover {
+  background: var(--primary-blue-light);
+  transform: scale(1.1);
 }
 
 /* Modificar as regras de grid para melhor responsividade */
@@ -190,7 +261,7 @@ h1 {
   justify-content: center;
   max-width: 100%;
   width: 100%;
-  min-height: 200px; /* Altura mínima para o tabuleiro */
+  min-height: 200px;
 }
 
 .game-board.easy {
@@ -227,7 +298,7 @@ h1 {
   cursor: pointer;
   border-radius: 10px;
   overflow: hidden;
-  will-change: transform; /* Otimização para animações */
+  will-change: transform;
 }
 
 .card-inner {
@@ -236,7 +307,7 @@ h1 {
   height: 100%;
   transition: transform 0.6s;
   transform-style: preserve-3d;
-  will-change: transform; /* Otimização para animações */
+  will-change: transform;
 }
 
 .card.flipped .card-inner {
@@ -254,7 +325,7 @@ h1 {
   justify-content: center;
   align-items: center;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  will-change: transform; /* Otimização para animações */
+  will-change: transform;
 }
 
 .card-front {
@@ -293,7 +364,7 @@ h1 {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block; /* Evita espaço em branco abaixo da imagem */
+  display: block;
 }
 
 #congratulations {
@@ -388,10 +459,18 @@ h1 {
 }
 
 /* Responsividade */
-/* Melhorar a responsividade para dispositivos móveis */
 @media (max-width: 768px) {
   .container {
     padding: 15px;
+  }
+
+  .audio-controls {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .audio-control-group {
+    justify-content: center;
   }
 
   .game-info {
@@ -436,6 +515,10 @@ h1 {
     margin-bottom: 15px;
   }
 
+  .volume-slider {
+    width: 60px;
+  }
+
   .game-board.easy {
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, 1fr);
@@ -473,7 +556,6 @@ h1 {
   }
 }
 
-/* Ajustar o tamanho das cartas para ocupar melhor o espaço */
 .card {
   aspect-ratio: 1;
   perspective: 1000px;
