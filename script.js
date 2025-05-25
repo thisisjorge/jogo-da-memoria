@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Sistema de áudio melhorado
   let isMusicEnabled = localStorage.getItem("memoryGameMusicEnabled") !== "false" // Padrão: true
   let isSoundEnabled = localStorage.getItem("memoryGameSoundEnabled") !== "false" // Padrão: true
-  let musicVolume = Number.parseInt(localStorage.getItem("memoryGameMusicVolume")) || 20 // Volume baixo padrão
+  let musicVolume = Number.parseInt(localStorage.getItem("memoryGameMusicVolume")) || 15 // Volume mais baixo padrão
   let soundVolume = Number.parseInt(localStorage.getItem("memoryGameSoundVolume")) || 25 // Volume baixo padrão
 
   // Criar elemento de áudio para música de fundo
@@ -55,11 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
   musicVolumeSlider.value = musicVolume
   soundVolumeSlider.value = soundVolume
 
-  // Função para tocar som
-  function playSound(sound) {
+  // Função para tocar som com volume específico
+  function playSound(sound, volumeMultiplier = 1) {
     if (isSoundEnabled) {
       const soundClone = sound.cloneNode(true)
-      soundClone.volume = soundVolume / 100
+      soundClone.volume = (soundVolume / 100) * volumeMultiplier
       soundClone.play().catch((error) => {
         console.log("Erro ao tocar som:", error)
       })
@@ -425,7 +425,7 @@ document.addEventListener("DOMContentLoaded", () => {
           gameCompleted()
         }
       } else {
-        playSound(sounds.noMatch)
+        playSound(sounds.noMatch, 0.4)
 
         setTimeout(() => {
           cards[firstIndex].isFlipped = false
@@ -442,7 +442,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function gameCompleted() {
-    playSound(sounds.victory)
+    playSound(sounds.victory, 1.2)
 
     finalAttemptsElement.textContent = attempts
     congratulationsElement.classList.remove("hidden")
