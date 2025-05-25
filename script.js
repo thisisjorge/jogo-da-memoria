@@ -11,51 +11,55 @@ document.addEventListener("DOMContentLoaded", () => {
   const hardButton = document.getElementById("hard-btn")
   const musicToggleButton = document.getElementById("music-toggle")
   const soundToggleButton = document.getElementById("sound-toggle")
+  const musicVolumeSlider = document.getElementById("music-volume")
+  const soundVolumeSlider = document.getElementById("sound-volume")
 
-  // Sistema de áudio simplificado
-  let isMusicEnabled = localStorage.getItem("memoryGameMusicEnabled") === "false" ? false : true
-  let isSoundEnabled = localStorage.getItem("memoryGameSoundEnabled") === "false" ? false : true
+  // Sistema de áudio melhorado
+  let isMusicEnabled = localStorage.getItem("memoryGameMusicEnabled") !== "false" // Padrão: true
+  let isSoundEnabled = localStorage.getItem("memoryGameSoundEnabled") !== "false" // Padrão: true
+  let musicVolume = Number.parseInt(localStorage.getItem("memoryGameMusicVolume")) || 20 // Volume baixo padrão
+  let soundVolume = Number.parseInt(localStorage.getItem("memoryGameSoundVolume")) || 25 // Volume baixo padrão
 
   // Criar elemento de áudio para música de fundo
   const backgroundMusic = new Audio()
-  // Usar o arquivo fundo.mp3 da pasta assets/sound com fallback
-  backgroundMusic.src = "assets/sound/fundo.mp3"
+  backgroundMusic.src = "assets/sound/fundo.mp3" // Música original de fundo
   backgroundMusic.onerror = () => {
     console.log("Erro ao carregar música de fundo local, usando fallback")
     backgroundMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
   }
   backgroundMusic.loop = true
-  backgroundMusic.volume = 0.3
-
-  // URL do som de vitória fornecido
-  const winSoundUrl = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/win-J6U1VtDtH9cKhqAXxXq0H7OVgRCas8.mp3"
+  backgroundMusic.volume = musicVolume / 100
 
   // Efeitos sonoros
   const sounds = {
     flip: new Audio("https://www.soundjay.com/buttons/sounds/button-09.mp3"),
     match: new Audio("https://www.soundjay.com/buttons/sounds/button-35.mp3"),
     noMatch: new Audio("https://www.soundjay.com/buttons/sounds/button-10.mp3"),
-    victory: new Audio("assets/sound/win.mp3"), // Usar o arquivo win.mp3 da pasta assets/sound
+    victory: new Audio("assets/sound/win.mp3"), // Som original de vitória
     gameStart: new Audio("https://www.soundjay.com/buttons/sounds/button-21.mp3"),
   }
 
-  // Configurar fallback para o som de vitória
+  // Configurar fallback para o som de vitória caso não carregue
   sounds.victory.onerror = () => {
     console.log("Erro ao carregar som de vitória local, usando URL fornecida")
-    sounds.victory.src = winSoundUrl
+    sounds.victory.src =
+      "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/win-J6U1VtDtH9cKhqAXxXq0H7OVgRCas8.mp3"
   }
 
   // Ajustar volume dos efeitos sonoros
   Object.values(sounds).forEach((sound) => {
-    sound.volume = 0.5
+    sound.volume = soundVolume / 100
   })
+
+  // Inicializar sliders
+  musicVolumeSlider.value = musicVolume
+  soundVolumeSlider.value = soundVolume
 
   // Função para tocar som
   function playSound(sound) {
     if (isSoundEnabled) {
-      // Clonar o som para permitir sobreposição
       const soundClone = sound.cloneNode(true)
-      soundClone.volume = sound.volume
+      soundClone.volume = soundVolume / 100
       soundClone.play().catch((error) => {
         console.log("Erro ao tocar som:", error)
       })
@@ -65,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Função para iniciar/parar música de fundo
   function toggleBackgroundMusic() {
     if (isMusicEnabled) {
+      backgroundMusic.volume = musicVolume / 100
       backgroundMusic.play().catch((error) => {
         console.log("Erro ao tocar música de fundo:", error)
       })
@@ -75,14 +80,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Atualizar ícones de áudio
   function updateAudioIcons() {
-    musicToggleButton.innerHTML = isMusicEnabled ? '<i class="fas fa-music"></i>' : '<i class="fas fa-volume-mute"></i>'
+    musicToggleButton.innerHTML = isMusicEnabled ? '<i class="fas fa-music"></i>' : '<i class="fas fa-music"></i>'
+    musicToggleButton.classList.toggle("muted", !isMusicEnabled)
 
-    soundToggleButton.innerHTML = isSoundEnabled
-      ? '<i class="fas fa-volume-up"></i>'
-      : '<i class="fas fa-volume-mute"></i>'
+    soundToggleButton.innerHTML = isSoundEnabled ? '<i class="fas fa-bell"></i>' : '<i class="fas fa-bell"></i>'
+    soundToggleButton.classList.toggle("muted", !isSoundEnabled)
   }
 
-  // Adicionar event listeners para os botões de áudio
+  // Event listeners para controles de áudio
   musicToggleButton.addEventListener("click", () => {
     isMusicEnabled = !isMusicEnabled
     localStorage.setItem("memoryGameMusicEnabled", isMusicEnabled.toString())
@@ -95,7 +100,28 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("memoryGameSoundEnabled", isSoundEnabled.toString())
     updateAudioIcons()
 
-    // Tocar um som de teste quando ativado
+    if (isSoundEnabled) {
+      playSound(sounds.flip)
+    }
+  })
+
+  // Event listeners para sliders de volume
+  musicVolumeSlider.addEventListener("input", (e) => {
+    musicVolume = Number.parseInt(e.target.value)
+    localStorage.setItem("memoryGameMusicVolume", musicVolume.toString())
+    backgroundMusic.volume = musicVolume / 100
+  })
+
+  soundVolumeSlider.addEventListener("input", (e) => {
+    soundVolume = Number.parseInt(e.target.value)
+    localStorage.setItem("memoryGameSoundVolume", soundVolume.toString())
+
+    // Atualizar volume de todos os sons
+    Object.values(sounds).forEach((sound) => {
+      sound.volume = soundVolume / 100
+    })
+
+    // Tocar som de teste
     if (isSoundEnabled) {
       playSound(sounds.flip)
     }
@@ -104,17 +130,29 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicializar ícones de áudio
   updateAudioIcons()
 
-  // Tentar iniciar música de fundo (se habilitada)
+  // Iniciar música de fundo automaticamente (se habilitada)
   if (isMusicEnabled) {
-    // Adicionar listener para interação do usuário para iniciar áudio
-    const startAudio = () => {
-      toggleBackgroundMusic()
-      document.removeEventListener("click", startAudio)
+    // Tentar iniciar imediatamente
+    toggleBackgroundMusic()
+
+    // Se falhar (política do navegador), tentar no primeiro clique
+    backgroundMusic.addEventListener("canplaythrough", () => {
+      if (isMusicEnabled && backgroundMusic.paused) {
+        toggleBackgroundMusic()
+      }
+    })
+
+    // Fallback para primeiro clique do usuário
+    const startAudioOnClick = () => {
+      if (isMusicEnabled && backgroundMusic.paused) {
+        toggleBackgroundMusic()
+      }
+      document.removeEventListener("click", startAudioOnClick)
     }
-    document.addEventListener("click", startAudio)
+    document.addEventListener("click", startAudioOnClick)
   }
 
-  // Todas as imagens disponíveis em um único array
+  // Imagens de exemplo para o jogo
   const allImages = [
     "assets/img/maxresdefault.jpg",
     "assets/img/Chip_Base_Tier_1.webp",
@@ -137,14 +175,12 @@ document.addEventListener("DOMContentLoaded", () => {
     "assets/img/Enemy_Missing_ping.webp",
   ]
 
-  // Imagens distribuídas para cada dificuldade (serão preenchidas dinamicamente)
   let difficultyImages = {
     easy: [],
     medium: [],
     hard: [],
   }
 
-  // Cache de imagens pré-carregadas
   const preloadedImages = {}
 
   // Estado do jogo
@@ -154,7 +190,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let matchedPairs = 0
   let isProcessing = false
   const attemptHistory = JSON.parse(localStorage.getItem("memoryGameHistory")) || []
-  let currentDifficulty = "easy" // Dificuldade padrão
+  let currentDifficulty = "easy"
 
   // Configurações de dificuldade
   const difficultySettings = {
@@ -169,14 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
       let loadedCount = 0
       const totalImages = imageUrls.length
 
-      // Se não houver imagens para carregar, resolva imediatamente
       if (totalImages === 0) {
         resolve()
         return
       }
 
       imageUrls.forEach((url) => {
-        // Se a imagem já estiver no cache, não carregue novamente
         if (preloadedImages[url]) {
           loadedCount++
           if (loadedCount === totalImages) {
@@ -197,7 +231,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         img.onerror = () => {
           console.warn(`Falha ao carregar imagem: ${url}`)
-          // Mesmo com erro, contamos como carregada para não travar o jogo
           preloadedImages[url] = false
           loadedCount++
           if (loadedCount === totalImages) {
@@ -210,77 +243,35 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 
-  // Função de embaralhamento melhorada para garantir uma mistura mais completa
   function thoroughShuffle(array) {
-    // Primeiro embaralhamento - Fisher-Yates shuffle
-    let newArray = [...array]
+    const newArray = [...array]
     for (let i = newArray.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1))
       ;[newArray[i], newArray[j]] = [newArray[j], newArray[i]]
     }
-
-    // Segundo embaralhamento - Embaralhamento adicional para garantir maior aleatoriedade
-    newArray = newArray.sort(() => Math.random() - 0.5)
-
-    // Terceiro embaralhamento - Divisão e intercalação
-    const half = Math.floor(newArray.length / 2)
-    const firstHalf = newArray.slice(0, half)
-    const secondHalf = newArray.slice(half)
-
-    // Intercalar as duas metades de forma aleatória
-    const result = []
-    while (firstHalf.length > 0 || secondHalf.length > 0) {
-      // Decidir aleatoriamente de qual metade pegar o próximo elemento
-      if (firstHalf.length === 0) {
-        result.push(secondHalf.shift())
-      } else if (secondHalf.length === 0) {
-        result.push(firstHalf.shift())
-      } else if (Math.random() < 0.5) {
-        result.push(firstHalf.shift())
-      } else {
-        result.push(secondHalf.shift())
-      }
-    }
-
-    return result
+    return newArray.sort(() => Math.random() - 0.5)
   }
 
-  // Distribuir imagens aleatoriamente para cada nível de dificuldade
   function distributeImages() {
-    // Embaralhar todas as imagens disponíveis com o embaralhamento melhorado
     const shuffledImages = thoroughShuffle([...allImages])
 
-    // Limpar as imagens anteriores
     difficultyImages = {
       easy: [],
       medium: [],
       hard: [],
     }
 
-    // Estratégia de distribuição alternativa para garantir maior separação
-    // Selecionar imagens em intervalos para cada dificuldade
-
-    // Calcular o total de pares necessários
     const totalPairsNeeded =
       difficultySettings.easy.pairs + difficultySettings.medium.pairs + difficultySettings.hard.pairs
 
-    // Verificar se temos imagens suficientes
-    if (shuffledImages.length < totalPairsNeeded) {
-      console.warn("Não há imagens suficientes para todos os níveis. Algumas imagens serão repetidas.")
-    }
-
-    // Criar uma cópia do array embaralhado para trabalhar
     const workingImages = [...shuffledImages]
 
-    // Se não tivermos imagens suficientes, duplicar algumas
     while (workingImages.length < totalPairsNeeded) {
       workingImages.push(...shuffledImages.slice(0, totalPairsNeeded - workingImages.length))
     }
 
-    // Embaralhar novamente após possível duplicação
     const finalImages = thoroughShuffle(workingImages)
 
-    // Distribuir para cada nível
     difficultyImages.easy = finalImages.slice(0, difficultySettings.easy.pairs)
     difficultyImages.medium = finalImages.slice(
       difficultySettings.easy.pairs,
@@ -291,51 +282,27 @@ document.addEventListener("DOMContentLoaded", () => {
       totalPairsNeeded,
     )
 
-    // Embaralhar novamente cada conjunto de imagens para garantir que não haja padrões
     difficultyImages.easy = thoroughShuffle(difficultyImages.easy)
     difficultyImages.medium = thoroughShuffle(difficultyImages.medium)
     difficultyImages.hard = thoroughShuffle(difficultyImages.hard)
 
-    // Pré-carregar todas as imagens para evitar problemas de carregamento durante o jogo
-    return preloadImages([
-      ...difficultyImages.easy,
-      ...difficultyImages.medium,
-      ...difficultyImages.hard,
-      "assets/img/Enemy_Missing_ping.webp", // Imagem da interrogação
-    ])
+    return preloadImages([...difficultyImages.easy, ...difficultyImages.medium, ...difficultyImages.hard])
   }
 
-  // Inicializar o jogo
   async function initializeGame() {
-    // Mostrar indicador de carregamento
     gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
-
-    // Distribuir e pré-carregar imagens
     await distributeImages()
-
-    // Tocar som de início de jogo
     playSound(sounds.gameStart)
-
-    // Iniciar o jogo após o carregamento das imagens
     initGame()
     updateHistoryDisplay()
   }
 
-  // Iniciar o processo
   initializeGame()
 
-  // Event listeners
   restartButton.addEventListener("click", async () => {
-    // Mostrar indicador de carregamento
     gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
-
-    // Tocar som de início de jogo
     playSound(sounds.gameStart)
-
-    // Redistribuir e pré-carregar imagens
     await distributeImages()
-
-    // Reiniciar o jogo
     restartGame()
   })
 
@@ -343,9 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
   mediumButton.addEventListener("click", () => setDifficulty("medium"))
   hardButton.addEventListener("click", () => setDifficulty("hard"))
 
-  // Funções
   async function setDifficulty(difficulty) {
-    // Atualizar botões de dificuldade
     easyButton.classList.remove("active")
     mediumButton.classList.remove("active")
     hardButton.classList.remove("active")
@@ -353,25 +318,15 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById(`${difficulty}-btn`).classList.add("active")
 
     currentDifficulty = difficulty
-
-    // Ajustar a classe do tabuleiro com base na dificuldade
     gameBoard.className = "game-board " + difficulty
 
-    // Mostrar indicador de carregamento
     gameBoard.innerHTML = '<div class="loading">Carregando imagens...</div>'
-
-    // Tocar som de início de jogo
     playSound(sounds.gameStart)
-
-    // Redistribuir e pré-carregar imagens
     await distributeImages()
-
-    // Reiniciar o jogo com a nova dificuldade
     restartGame()
   }
 
   function initGame() {
-    // Resetar estado
     cards = []
     flippedCards = []
     attempts = 0
@@ -381,24 +336,17 @@ document.addEventListener("DOMContentLoaded", () => {
     congratulationsElement.classList.add("hidden")
     gameBoard.innerHTML = ""
 
-    // Ajustar a classe do tabuleiro com base na dificuldade atual
     gameBoard.className = "game-board " + currentDifficulty
 
-    // Obter número de pares com base na dificuldade
     const numPairs = difficultySettings[currentDifficulty].pairs
-
-    // Obter imagens para o nível de dificuldade atual
     const currentImages = difficultyImages[currentDifficulty]
 
-    // Verificar se temos imagens suficientes para o nível
     if (currentImages.length < numPairs) {
       console.warn(`Não há imagens suficientes para o nível ${currentDifficulty}. Usando imagens repetidas.`)
     }
 
-    // Criar pares de cartas
     const cardPairs = []
 
-    // Criar os pares de cartas
     currentImages.forEach((imageUrl, index) => {
       cardPairs.push(
         { imageUrl, isFlipped: false, isMatched: false, pairId: index },
@@ -406,10 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
       )
     })
 
-    // Embaralhar as cartas com o embaralhamento melhorado
     cards = thoroughShuffle(cardPairs)
-
-    // Renderizar cartas no tabuleiro
     renderCards()
   }
 
@@ -421,24 +366,21 @@ document.addEventListener("DOMContentLoaded", () => {
       cardElement.className = "card"
       cardElement.dataset.index = index
 
-      // Verificar se a imagem foi pré-carregada com sucesso
       const imageStatus = preloadedImages[card.imageUrl]
-
       // Usar uma imagem de fallback se a imagem original falhou no carregamento
       const imageUrl = imageStatus === false ? "assets/img/Enemy_Missing_ping.webp" : card.imageUrl
 
       cardElement.innerHTML = `
-                <div class="card-inner">
-                    <div class="card-front">
-                        <img src="assets/img/Enemy_Missing_ping.webp" alt="?" class="card-question">
-                    </div>
-                    <div class="card-back">
-                        <img src="${imageUrl}" alt="Card Image" class="card-image">
-                    </div>
-                </div>
-            `
+  <div class="card-inner">
+    <div class="card-front">
+      <img src="assets/img/Enemy_Missing_ping.webp" alt="?" class="card-question">
+    </div>
+    <div class="card-back">
+      <img src="${imageUrl}" alt="Card Image" class="card-image">
+    </div>
+  </div>
+`
 
-      // Adicionar classe 'flipped' se a carta já estiver virada ou combinada
       if (card.isFlipped || card.isMatched) {
         cardElement.classList.add("flipped")
       }
@@ -449,55 +391,42 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function flipCard(index) {
-    // Impedir virar mais de 2 cartas ou cartas já viradas/combinadas ou durante processamento
     if (isProcessing || flippedCards.length >= 2 || cards[index].isFlipped || cards[index].isMatched) {
       return
     }
 
-    // Tocar som de virar carta
     playSound(sounds.flip)
 
-    // Virar a carta
     cards[index].isFlipped = true
     flippedCards.push(index)
 
-    // Atualizar a visualização
     document.querySelector(`.card[data-index="${index}"]`).classList.add("flipped")
 
-    // Verificar se duas cartas foram viradas
     if (flippedCards.length === 2) {
       isProcessing = true
       attempts++
       attemptsElement.textContent = attempts
 
-      // Verificar se as cartas são iguais
       const [firstIndex, secondIndex] = flippedCards
       const firstCard = cards[firstIndex]
       const secondCard = cards[secondIndex]
 
-      // Verificar se as cartas têm o mesmo pairId
       if (firstCard.pairId === secondCard.pairId) {
-        // Cartas combinam
         firstCard.isMatched = true
         secondCard.isMatched = true
         matchedPairs++
 
-        // Tocar som de combinação
         playSound(sounds.match)
 
-        // Resetar para próxima jogada
         flippedCards = []
         isProcessing = false
 
-        // Verificar se o jogo foi concluído
         if (matchedPairs === difficultySettings[currentDifficulty].pairs) {
           gameCompleted()
         }
       } else {
-        // Cartas não combinam, tocar som de erro
         playSound(sounds.noMatch)
 
-        // Virar de volta após um tempo
         setTimeout(() => {
           cards[firstIndex].isFlipped = false
           cards[secondIndex].isFlipped = false
@@ -513,14 +442,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function gameCompleted() {
-    // Tocar som de vitória
     playSound(sounds.victory)
 
-    // Mostrar mensagem de parabéns
     finalAttemptsElement.textContent = attempts
     congratulationsElement.classList.remove("hidden")
 
-    // Adicionar ao histórico com informação de dificuldade
     const historyEntry = {
       attempts: attempts,
       difficulty: currentDifficulty,
@@ -530,16 +456,11 @@ document.addEventListener("DOMContentLoaded", () => {
     attemptHistory.push(historyEntry)
     localStorage.setItem("memoryGameHistory", JSON.stringify(attemptHistory))
 
-    // Atualizar exibição do histórico
     updateHistoryDisplay()
-
-    // Criar efeito de confete
     createConfetti()
 
-    // Redistribuir imagens para o próximo jogo
     await distributeImages()
 
-    // Reiniciar o jogo automaticamente após 3 segundos
     setTimeout(() => {
       congratulationsElement.classList.add("hidden")
       initGame()
@@ -560,15 +481,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return
     }
 
-    // Mostrar apenas as últimas 10 partidas para não sobrecarregar a interface
     const recentHistory = attemptHistory.slice(-10)
 
     recentHistory.forEach((entry, index) => {
       const historyItem = document.createElement("li")
 
-      // Verificar se o entry é um objeto (novo formato) ou um número (formato antigo)
       if (typeof entry === "object") {
-        // Formatar a dificuldade para exibição
         const difficultyText =
           {
             easy: "Fácil",
@@ -581,7 +499,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     <span>${entry.attempts} tentativas (${difficultyText})</span>
                 `
       } else {
-        // Formato antigo (apenas número de tentativas)
         historyItem.innerHTML = `
                     <span>Partida ${attemptHistory.length - (recentHistory.length - 1 - index)}:</span>
                     <span>${entry} tentativas</span>
@@ -593,30 +510,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function createConfetti() {
-    // Cores baseadas no wallpaper
     const colors = ["#3b82f6", "#ec4899", "#7e22ce", "#06b6d4", "#facc15"]
 
     for (let i = 0; i < 100; i++) {
       const confetti = document.createElement("div")
       confetti.className = "confetti"
 
-      // Posição aleatória
       const left = Math.random() * 100
 
-      // Estilo aleatório
       confetti.style.left = `${left}%`
       confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)]
       confetti.style.width = `${Math.random() * 10 + 5}px`
       confetti.style.height = `${Math.random() * 10 + 5}px`
       confetti.style.opacity = Math.random() * 0.7 + 0.3
 
-      // Animação com duração aleatória
       const duration = Math.random() * 3 + 2
       confetti.style.animation = `fall ${duration}s linear forwards`
 
       document.body.appendChild(confetti)
 
-      // Remover após a animação
       setTimeout(() => {
         confetti.remove()
       }, duration * 1000)
