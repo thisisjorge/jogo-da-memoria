@@ -130,26 +130,24 @@ document.addEventListener("DOMContentLoaded", () => {
   // Inicializar ícones de áudio
   updateAudioIcons()
 
-  // Iniciar música de fundo automaticamente (se habilitada)
+  // Forçar início da música automaticamente
   if (isMusicEnabled) {
     // Tentar iniciar imediatamente
-    toggleBackgroundMusic()
+    setTimeout(() => {
+      toggleBackgroundMusic()
+    }, 500)
 
-    // Se falhar (política do navegador), tentar no primeiro clique
-    backgroundMusic.addEventListener("canplaythrough", () => {
+    // Garantir que a música toque no primeiro clique se não conseguir iniciar automaticamente
+    const ensureAudioStart = () => {
       if (isMusicEnabled && backgroundMusic.paused) {
         toggleBackgroundMusic()
       }
-    })
-
-    // Fallback para primeiro clique do usuário
-    const startAudioOnClick = () => {
-      if (isMusicEnabled && backgroundMusic.paused) {
-        toggleBackgroundMusic()
-      }
-      document.removeEventListener("click", startAudioOnClick)
+      document.removeEventListener("click", ensureAudioStart)
+      document.removeEventListener("keydown", ensureAudioStart)
     }
-    document.addEventListener("click", startAudioOnClick)
+
+    document.addEventListener("click", ensureAudioStart)
+    document.addEventListener("keydown", ensureAudioStart)
   }
 
   // Imagens de exemplo para o jogo
@@ -395,7 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return
     }
 
-    playSound(sounds.flip)
+    playSound(sounds.flip, 0.3)
 
     cards[index].isFlipped = true
     flippedCards.push(index)
@@ -425,7 +423,7 @@ document.addEventListener("DOMContentLoaded", () => {
           gameCompleted()
         }
       } else {
-        playSound(sounds.noMatch, 0.4)
+        playSound(sounds.noMatch, 0.2)
 
         setTimeout(() => {
           cards[firstIndex].isFlipped = false
@@ -442,7 +440,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function gameCompleted() {
-    playSound(sounds.victory, 1.2)
+    playSound(sounds.victory, 1.8)
 
     finalAttemptsElement.textContent = attempts
     congratulationsElement.classList.remove("hidden")
