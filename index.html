@@ -13,12 +13,27 @@
         <h1>Jogo da Memória</h1>
         
         <div class="audio-controls">
-            <button id="music-toggle" class="audio-btn" title="Música de fundo">
-                <i class="fas fa-music"></i>
-            </button>
-            <button id="sound-toggle" class="audio-btn" title="Efeitos sonoros">
-                <i class="fas fa-volume-up"></i>
-            </button>
+            <div class="audio-control-group">
+                <button id="music-toggle" class="audio-btn" title="Música de fundo">
+                    <i class="fas fa-music"></i>
+                </button>
+                <div class="volume-control">
+                    <i class="fas fa-volume-down"></i>
+                    <input type="range" id="music-volume" class="volume-slider" min="0" max="100" value="30">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+            </div>
+            
+            <div class="audio-control-group">
+                <button id="sound-toggle" class="audio-btn" title="Efeitos sonoros">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <div class="volume-control">
+                    <i class="fas fa-volume-down"></i>
+                    <input type="range" id="sound-volume" class="volume-slider" min="0" max="100" value="50">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+            </div>
         </div>
         
         <div class="difficulty-selector">
